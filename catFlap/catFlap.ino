@@ -1,8 +1,9 @@
 //#include <Types.h>
 
-#include "connectedDoor.h"
+#include "connectedDoor.hpp"
+// #include <Types.h>
 
-//ConnectedDoor m_door = ConnectedDoor()
+ConnectedDoor m_connectedDoor = ConnectedDoor();
 
 void setup() {
   // put your setup code here, to run once:
