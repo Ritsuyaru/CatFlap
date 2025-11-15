@@ -51,6 +51,5 @@ static const u_char pinServoDoor  = 5;
 static const u_char pinRFID_Rst   = 5;
 static const u_char pinRFID_Tx    = 6;
 
-
-
+static const u_char pinDetectorMvt = 7;
 

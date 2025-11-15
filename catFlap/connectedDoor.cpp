@@ -14,6 +14,10 @@ void ConnectedDoor::init()
   m_green_led.init(pinGreenLed);
   // m_reset_button.init(pinRstButton);
   m_save_button.init(pinSaveButton);
+<<<<<<< Updated upstream
+=======
+  m_Detector_mvt.init(pinDetectorMvt);
+>>>>>>> Stashed changes
 
   m_step_saving = STEP_SAVE_READY;
   // m_readerId.init();
@@ -31,7 +35,7 @@ void ConnectedDoor::process()
   u_long millisec = millis();
   // m_reset_button.process(millisec);
   m_save_button.process(millisec);
-  // if (detector) // go to sleep if nothing and economizing energy
+  // if (m_detector_mvt.isPush) // go to sleep if nothing and economizing energy
   // if (m_save_button.isPush())
   // {
   //   processSaveCat();
@@ -48,28 +52,39 @@ void ConnectedDoor::process()
   //     }
   //   }
   // }
+  // else
+  // {
+  //   sleep(50);
+  // }
+  }
 }
 
 void ConnectedDoor::processSaveCat(u_long current_millis)
 {
-  switch(m_step_saving)
+  switch (m_step_saving)
   {
     case STEP_SAVE_READY:
       // blink Green Led / or ligth green LED
       m_green_led.blinck(current_millis);
-      m_step_saving = STEP_SAVE_WAIT_CAT;
+      if (m_detector_mvt.isPush()) m_step_saving = STEP_SAVE_WAIT_CAT;
       break;
     case STEP_SAVE_WAIT_CAT:
+    {
       m_green_led.blinck(current_millis);
-      // if (cat) m_step_saving = STEP_SAVING;
+      // Read cat Id
+      u_char catId = NULL;
+      m_step_saving = STEP_SAVING;
       break;
+    }
     case STEP_SAVING:
     {
+      m_green_led.ligth();
       m_red_led.ligth();
       // save cat id in a list / push back
       u_char list_size = 0;
       // Read Cat
-      u_char catId = NULL;
+
+      // Save cat id in EEPROM
       list_size = EEPROM.read(LIST_ADDR);
       EEPROM.write(LIST_ADDR, list_size++);
       EEPROM.write(CAT_ADDR+list_size, catId);
@@ -88,6 +103,8 @@ void ConnectedDoor::processSaveCat(u_long current_millis)
       break;
     case STEP_SAVE_WRONG:
     default:
+      if (m_timer.isTimeUp(current_millis)) m_step_saving = STEP_SAVE_READY;
+      m_red_led.blinck(current_millis);
       break;
   }
 }
