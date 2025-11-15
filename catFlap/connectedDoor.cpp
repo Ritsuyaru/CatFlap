@@ -14,10 +14,7 @@ void ConnectedDoor::init()
   m_green_led.init(pinGreenLed);
   // m_reset_button.init(pinRstButton);
   m_save_button.init(pinSaveButton);
-<<<<<<< Updated upstream
-=======
-  m_Detector_mvt.init(pinDetectorMvt);
->>>>>>> Stashed changes
+  m_detector_mvt.init(pinDetectorMvt);
 
   m_step_saving = STEP_SAVE_READY;
   // m_readerId.init();

@@ -12,7 +12,7 @@
 #include "door.hpp"
 #include "led.hpp"
 #include "button.hpp"
-#include "timerup.hpp"
+#include "timeup.hpp"
 // #include "librairies/StandardCplusplus-master/StandardCplusplus.h"
 
 // #include <list>
@@ -36,7 +36,7 @@ class ConnectedDoor {
 
     TimeUp m_timer;
 
-    u_char m_cat_id
+    u_char m_cat_id;
 
     // RfidReader m_reader;
     std::vector<u_char> m_savedIdList;
