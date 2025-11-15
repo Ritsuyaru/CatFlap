@@ -1,15 +1,22 @@
+#include "params.h"
 #include "connectedDoor.hpp"
 
-ConnectedDoor::ConnectedDoor() {}
+ConnectedDoor::ConnectedDoor()
+{
+}
 
 ConnectedDoor::~ConnectedDoor() {}
 
 void ConnectedDoor::init()
 {
-  pinMode(pinRedLed, OUTPUT);
-  digitalWrite(pinRedLed, LOW);
-  pinMode(pinGreenLed, OUTPUT);
-  digitalWrite(pinGreenLed, LOW);
+  m_door.init();
+  m_red_led.init(pinRedLed);
+  m_green_led.init(pinGreenLed);
+  // m_reset_button.init(pinRstButton);
+  m_save_button.init(pinSaveButton);
+
+  m_step_saving = STEP_SAVE_READY;
+  // m_readerId.init();
 
   u_char list_size = EEPROM.read(LIST_ADDR);
   for (u_char cat=0; cat<=list_size; cat++)
@@ -21,7 +28,11 @@ void ConnectedDoor::init()
 
 void ConnectedDoor::process()
 {
-  // if (m_save_mode)
+  u_long millisec = millis();
+  // m_reset_button.process(millisec);
+  m_save_button.process(millisec);
+  // if (detector) // go to sleep if nothing and economizing energy
+  // if (m_save_button.isPush())
   // {
   //   processSaveCat();
   // }
@@ -39,24 +50,44 @@ void ConnectedDoor::process()
   // }
 }
 
-void ConnectedDoor::processSaveCat()
+void ConnectedDoor::processSaveCat(u_long current_millis)
 {
-  // blink Red Led / or ligth red LED
-  digitalWrite(pinRedLed, HIGH);
-  // Read Cat
-  u_char catId = NULL;
-  while (catId == NULL)
+  switch(m_step_saving)
   {
-    // catID = m_reader.readId();
+    case STEP_SAVE_READY:
+      // blink Green Led / or ligth green LED
+      m_green_led.blinck(current_millis);
+      m_step_saving = STEP_SAVE_WAIT_CAT;
+      break;
+    case STEP_SAVE_WAIT_CAT:
+      m_green_led.blinck(current_millis);
+      // if (cat) m_step_saving = STEP_SAVING;
+      break;
+    case STEP_SAVING:
+    {
+      m_red_led.ligth();
+      // save cat id in a list / push back
+      u_char list_size = 0;
+      // Read Cat
+      u_char catId = NULL;
+      list_size = EEPROM.read(LIST_ADDR);
+      EEPROM.write(LIST_ADDR, list_size++);
+      EEPROM.write(CAT_ADDR+list_size, catId);
+      m_step_saving = STEP_SAVE_SUCCESS;
+      break;
+    }
+    case STEP_SAVE_SUCCESS:
+      m_red_led.off();
+      m_green_led.ligth();
+      // if (timeup) m_step_saving = STEP_SAVE_ENDING;
+      break;
+    case STEP_SAVE_ENDING:
+      m_green_led.off();
+      m_save_mode = false;
+      m_step_saving = STEP_SAVE_READY;
+      break;
+    case STEP_SAVE_WRONG:
+    default:
+      break;
   }
-  // light green led
-  digitalWrite(pinGreenLed, HIGH);
-  // save cat id in a list / push back
-  u_char list_size = 0;
-  list_size = EEPROM.read(LIST_ADDR);
-  EEPROM.write(LIST_ADDR, list_size++);
-
-  EEPROM.write(CAT_ADDR+list_size, catId);
-  // End process
-  digitalWrite(pinRedLed, LOW);
 }
